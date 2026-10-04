@@ -23,11 +23,13 @@ Reformat data so that route number and route name are distinct variables. How ma
 
 ```{r}
 library(tidyverse)
+library(dplyr)
 
 transit_df = read_csv(file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
  na = c("NA", ".", ""))|>
 janitor::clean_names() |>
 select (line, station_name, station_latitude, station_longitude, route1,route2, route3, route4, route5, route6, route7, route8, route9, route10, route11, entry, vending, entrance_type, ada)|> 
+  distinct() |>
   mutate(
     entry = recode_values(
       entry,
@@ -40,4 +42,108 @@ select (line, station_name, station_latitude, station_longitude, route1,route2, 
 __Description__
 
 Dataset contains variables: `r names(transit_df)`. For data cleaning, we have cleaned names, selected our desired variables, and standardized missing values to NA. This dataset contains `r ncol(transit_df)` columns and `r nrow(transit_df)` rows. 
+
+How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox)? `r n_distinct(pull(transit_df, station_name+line))` unique stations 
+
+This dataset could be more "tidier", the 11 route variable columns are difficult to read 
+
+How many stations are ADA compliant? 84 
+What proportion of station entrances / exits without vending allow entrance?
+45/117 = 0.3846154
+
+Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? 60
+Of the stations that serve the A train, how many are ADA compliant? 17
+
+#do i delete NA route name?
+
+```{r ada}
+transit_distinct_df = 
+  distinct(transit_df, station_name, line, .keep_all = TRUE) 
+
+transit_distinct_df|> 
+filter(ada ==TRUE) |> 
+  nrow()
+
+n_distinct(pull(transit_df, station_name+line))
+# 472, not 465 
+
+```
+```{r}
+
+
+```
+
+```{r vending and entry}
+filter(transit_df,vending == "NO")|> 
+  nrow() #117
+
+filter(transit_df,vending == "NO", entry == "1") |>
+  nrow() #45
+
+```
+
+```{r reformat routes}
+#how many a train stations
+transit_df |>
+  mutate (
+    route8 = as.character(route8),
+    route9 = as.character(route9),
+    route10 = as.character(route10),
+    route11 = as.character(route11)
+    ) |> 
+  pivot_longer(
+    route1:route11,
+    names_to = "route_number", 
+    names_prefix = "route",
+    values_to = "route_name") |>
+  
+filter(route_name=="A" )|>
+ distinct( station_name, line, .keep_all = TRUE) |>
+  nrow() #60
+
+#how many are ada compliant
+transit_df |>
+  mutate (
+    route8 = as.character(route8),
+    route9 = as.character(route9),
+    route10 = as.character(route10),
+    route11 = as.character(route11)
+    ) |> 
+  pivot_longer(
+    route1:route11,
+    names_to = "route_number", 
+    names_prefix = "route",
+    values_to = "route_name") |>
+  
+filter(route_name=="A" )|>
+ distinct( station_name, line, .keep_all = TRUE) |>
+filter(ada=="TRUE" )|>
+nrow()
+
+```
+
+#Question 2 
+
+Importing data from Mr. Trash Wheel, Professor Trash Wheel, Gwynns Falls Trash Wheel.
+```{r import data}
+library(readxl)
+
+mrtrash_df = read_excel("./data/202509 Trash Wheel Collection Data.xlsx", sheet="Mr. Trash Wheel",  
+             na = c("NA", ".", ""))|>
+             janitor::clean_names() 
+  
+proftrash_df = read_excel("./data/202509 Trash Wheel Collection Data.xlsx", sheet="Professor Trash Wheel",
+              na = c("NA", ".", ""))|>
+             janitor::clean_names() 
+
+Gwynnstrash_df = read_excel("./data/202509 Trash Wheel Collection Data.xlsx", sheet="Gwynns Falls Trash Wheel",
+              na = c("NA", ".", ""))|>
+             janitor::clean_names()  
+```
+
+Cleaning Mr. Trash Wheel
+```{r}
+mrtrash_df |>
+  select(-...15, -...16) #deleted unnecessary columns
+```
 
