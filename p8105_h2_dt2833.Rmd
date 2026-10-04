@@ -3,8 +3,10 @@ title: "p8105_hw2_dt2833"
 author: "Dominique Tzou"
 date: "2026-10-04"
 output: github_document
----
 
+
+---
+options(scipen=999)
 instructions: 
 Read and clean the data; retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance. Convert the entry variable from character (YES vs NO) to a logical variable (case_match function may be useful).
 
@@ -195,10 +197,7 @@ The trashwheel dataset contains data from three trash wheels: Mr. Trash Wheel, P
 
 The total weight of trash collected by Professor Trash Wheel is `r filter(trashwheels_df,trash_wheel == "Professor Trash Wheel") |> select(weight_tons) |>sum() ` tons. 
 
-The total number of cigarette butts collected by Gwynnda in June of 2022 is `r filter(trashwheels_df,trash_wheel == "Gwynns Falls Trash Wheel", month == "June", year == 2022) |> select(cigarette_butts) |> sum() #fix`
+The total number of cigarette butts collected by Gwynnda in June of 2022 is `r filter(trashwheels_df,trash_wheel == "Gwynns Falls Trash Wheel", month == "June", year == 2022) |> select(cigarette_butts) |> sum() |> format( scientific=FALSE)`
 
 
-```{r}
-
-```
 
