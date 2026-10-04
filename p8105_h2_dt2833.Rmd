@@ -24,9 +24,20 @@ Reformat data so that route number and route name are distinct variables. How ma
 ```{r}
 library(tidyverse)
 
-transit_df = read_csv(file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv")|>
-janitor::clean_names() 
-select (transit_df, line, station_name, station_latitude, station_longitude, route1,route2, route3, route4, route5, route6, route7, route8, route9, route10, route11, entry, vending, entrance_type, ada)
-
+transit_df = read_csv(file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
+ na = c("NA", ".", ""))|>
+janitor::clean_names() |>
+select (line, station_name, station_latitude, station_longitude, route1,route2, route3, route4, route5, route6, route7, route8, route9, route10, route11, entry, vending, entrance_type, ada)|> 
+  mutate(
+    entry = recode_values(
+      entry,
+      "YES"  ~ 1,
+      "NO" ~ 0
+    )) #case_match()` was deprecated in dplyr 1.2.0.
 ```
+
+
+__Description__
+
+Dataset contains variables: `r names(transit_df)`. For data cleaning, we have cleaned names, selected our desired variables, and standardized missing values to NA. This dataset contains `r ncol(transit_df)` columns and `r nrow(transit_df)` rows. 
 
