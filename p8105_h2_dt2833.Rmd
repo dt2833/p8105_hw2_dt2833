@@ -186,7 +186,19 @@ mrtrash_df =
 
 trashwheels_df = 
   bind_rows(mrtrash_df, proftrash_df, gwynnstrash_df) |>
-  janitor::clean_names() |> view()
+  janitor::clean_names() 
 ```
 
+Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in the resulting dataset, and give examples of key variables. For available data, what was the total weight of trash collected by Professor Trash Wheel? What was the total number of cigarette butts collected by Gwynnda in June of 2022?
+
+The trashwheel dataset contains data from three trash wheels: Mr. Trash Wheel, Professor Trash Wheel and Gwynns Falls Trash Wheel. There is a total of `r nrow(trashwheels_df)` observations, `r nrow(filter(trashwheels_df,trash_wheel == "Mr. Trash Wheel" ))` observations from Mr. Trash Wheel,`r nrow(filter(trashwheels_df,trash_wheel == "Professor Trash Wheel" ))` observations from Professor Trash Wheel, and `r nrow(filter(trashwheels_df,trash_wheel == "Gwynns Falls Trash Wheel" ))` observations from Gwynns Falls Trash Wheel. This dataset includes information on types of trash collected including, `r names(trashwheels_df |> select(plastic_bottles:sports_balls))`, while only sports ball data is only available for Mr. Trash Wheel. Other details on collection include `r names(trashwheels_df |> select(date, homes_powered))`, weight in tones and volume in cubic yards.
+
+The total weight of trash collected by Professor Trash Wheel is `r filter(trashwheels_df,trash_wheel == "Professor Trash Wheel") |> select(weight_tons) |>sum() ` tons. 
+
+The total number of cigarette butts collected by Gwynnda in June of 2022 is `r filter(trashwheels_df,trash_wheel == "Gwynns Falls Trash Wheel", month == "June", year == 2022) |> select(cigarette_butts) |> sum() #fix`
+
+
+```{r}
+
+```
 
