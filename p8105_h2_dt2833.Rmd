@@ -136,7 +136,7 @@ proftrash_df = read_excel("./data/202509 Trash Wheel Collection Data.xlsx", shee
               na = c("NA", ".", ""))|>
              janitor::clean_names() 
 
-Gwynnstrash_df = read_excel("./data/202509 Trash Wheel Collection Data.xlsx", sheet="Gwynns Falls Trash Wheel",
+gwynnstrash_df = read_excel("./data/202509 Trash Wheel Collection Data.xlsx", sheet="Gwynns Falls Trash Wheel",
               na = c("NA", ".", ""))|>
              janitor::clean_names()  
 ```
@@ -144,6 +144,24 @@ Gwynnstrash_df = read_excel("./data/202509 Trash Wheel Collection Data.xlsx", sh
 Cleaning Mr. Trash Wheel
 ```{r}
 mrtrash_df |>
-  select(-...15, -...16) #deleted unnecessary columns
+  select(-x15, -x16)|>  #deleted unnecessary columns 
+  filter (!is.na(dumpster)) |> #deleted non-dumpster specific data rows
+  mutate(sports_balls = as.integer(round(sports_balls)), #what is the correct why to do this besides nesting
+         trash_wheel = "Mr. Trash Wheel")  # creating new variable to indicate wheel source of data  
 ```
 
+Cleaning Professor Trash Wheel
+```{r}
+proftrash_df |>
+  filter (!is.na(dumpster)) |> #deleted non-dumpster specific data rows
+  mutate(trash_wheel = "Professor Trash Wheel")  # creating new variable to indicate wheel source of data 
+
+```
+
+Gwynns Falls Trash Wheel
+```{r}
+gwynnstrash_df |>
+  filter (!is.na(dumpster)) |> #deleted non-dumpster specific data rows
+    mutate(trash_wheel = "Gwynns Falls Trash Wheel")  # creating new variable to indicate wheel source of data 
+
+```
