@@ -143,25 +143,50 @@ gwynnstrash_df = read_excel("./data/202509 Trash Wheel Collection Data.xlsx", sh
 
 Cleaning Mr. Trash Wheel
 ```{r}
-mrtrash_df |>
-  select(-x15, -x16)|>  #deleted unnecessary columns 
+mrtrash_df = 
+  select(mrtrash_df,-x15, -x16)|>  #deleted unnecessary columns 
   filter (!is.na(dumpster)) |> #deleted non-dumpster specific data rows
-  mutate(sports_balls = as.integer(round(sports_balls)), #what is the correct why to do this besides nesting
-         trash_wheel = "Mr. Trash Wheel")  # creating new variable to indicate wheel source of data  
+  mutate(
+        sports_balls = round(sports_balls), 
+        sports_balls = as.integer(sports_balls), 
+        trash_wheel = "Mr. Trash Wheel") |> # creating new variable to indicate wheel source of data 
+  relocate(trash_wheel) 
+
 ```
 
 Cleaning Professor Trash Wheel
-```{r}
-proftrash_df |>
-  filter (!is.na(dumpster)) |> #deleted non-dumpster specific data rows
-  mutate(trash_wheel = "Professor Trash Wheel")  # creating new variable to indicate wheel source of data 
+```{r Professor Trash Wheel}
+proftrash_df =
+  filter (proftrash_df, !is.na(dumpster)) |> #deleted non-dumpster specific data rows
+  mutate(trash_wheel = "Professor Trash Wheel")  |> # creating new variable to indicate wheel source of data 
+  relocate(trash_wheel) 
+```
+
+Cleaning Gwynns Falls Trash Wheel
+```{r Gwynns Falls Trash Wheel}
+gwynnstrash_df = 
+  filter (gwynnstrash_df, !is.na(dumpster)) |> #deleted non-dumpster specific data rows
+    mutate(trash_wheel = "Gwynns Falls Trash Wheel") |> # creating new variable to indicate wheel source of data 
+  relocate(trash_wheel) 
 
 ```
 
-Gwynns Falls Trash Wheel
+Combining into 1 dataframe
 ```{r}
-gwynnstrash_df |>
-  filter (!is.na(dumpster)) |> #deleted non-dumpster specific data rows
-    mutate(trash_wheel = "Gwynns Falls Trash Wheel")  # creating new variable to indicate wheel source of data 
 
+str(mrtrash_df) # year variable needs to be converted to numeric to match other dataframes
+str(proftrash_df)
+str(gwynnstrash_df)
+
+#converting 
+mrtrash_df = 
+  mutate(mrtrash_df, year = as.numeric(year))
+
+#binding rows
+
+trashwheels_df = 
+  bind_rows(mrtrash_df, proftrash_df, gwynnstrash_df) |>
+  janitor::clean_names() |> view()
 ```
+
+
