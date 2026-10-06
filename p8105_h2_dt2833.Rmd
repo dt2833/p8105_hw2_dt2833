@@ -60,14 +60,24 @@ Of the stations that serve the A train, how many are ADA compliant? 17
 
 ```{r ada}
 transit_distinct_df = 
-  distinct(transit_df, station_name, line, .keep_all = TRUE) 
+  distinct(transit_df, station_name, line, .keep_all = TRUE)  |> nrow()
 
 transit_distinct_df|> 
 filter(ada ==TRUE) |> 
   nrow()
 
-n_distinct(pull(transit_df, station_name+line))
+
+n_distinct(pull(transit_df, station_name+line)) # + 
 # 472, not 465 
+n_distinct(pull(transit_df, interaction(line, station_name)))
+
+transit_df %>%
+
+mutate(station_and_line = interaction(station_name, line)) %>% #interaction: 
+
+pull(station_and_line) %>%
+
+n_distinct()
 
 ```
 ```{r}
