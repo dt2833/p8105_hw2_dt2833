@@ -35,8 +35,8 @@ select (line, station_name, station_latitude, station_longitude, route1,route2, 
   mutate(
     entry = recode_values(
       entry,
-      "YES"  ~ 1,
-      "NO" ~ 0
+      "YES"  ~ TRUE,
+      "NO" ~ FALSE
     )) #case_match()` was deprecated in dplyr 1.2.0.
 ```
 
@@ -89,8 +89,8 @@ n_distinct()
 filter(transit_df,vending == "NO")|> 
   nrow() #117
 
-filter(transit_df,vending == "NO", entry == "1") |>
-  nrow() #45
+filter(transit_df,vending == "NO", entry == "FALSE") |>
+  nrow() #72
 
 ```
 
