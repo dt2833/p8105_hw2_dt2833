@@ -10,7 +10,7 @@ output: github_document
 
 # Question 1
 
-
+Loading in Libraries
 ```{r}
 library(tidyverse)
 library(dplyr)
@@ -19,7 +19,7 @@ transit_df = read_csv(file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.c
  na = c("NA", ".", ""))|>
 janitor::clean_names() |>
 select (line, station_name, station_latitude, station_longitude, route1,route2, route3, route4, route5, route6, route7, route8, route9, route10, route11, entry, vending, entrance_type, ada)|> 
-  distinct() |>
+  distinct() |> #deletes any repeated rows, since come variables were deleted
   mutate(
     entry = recode_values(
       entry,
@@ -93,18 +93,18 @@ transit_df |>
 filter(route_name=="A" )|>
  distinct( station_name, line, .keep_all = TRUE) |>
 filter(ada=="TRUE" )|>
-nrow()
+nrow() #17
 
 ```
 
 __Description__
 
-Dataset contains variables: `r names(transit_df)`. Each route variable represents an additional line that station serves (the most train routes served at one station is 11). For data cleaning, we have cleaned names, selected our desired variables, and standardized missing values to NA. This dataset contains `r ncol(transit_df)` columns and `r nrow(transit_df)` rows. 
+Dataset contains variables on station details: `r names(transit_df)` compliance. Each route variable represents an additional line that station serves (the most train routes served at one station is 11). For data cleaning, we have cleaned names, selected our desired variables, and standardized missing values to NA. This dataset contains `r ncol(transit_df)` columns and `r nrow(transit_df)` rows. 
 
-How many distinct stations are there?  `r distinct(transit_df, station_name, line, .keep_all = TRUE)  |> nrow()` unique stations 
 
 This dataset could be more "tidier", the 11 route variable columns are difficult to read . 
 
+How many distinct stations are there?  `r distinct(transit_df, station_name, line, .keep_all = TRUE)  |> nrow()` unique stations 
 
 How many stations are ADA compliant? `r transit_distinct_df|> filter(ada ==TRUE) |> nrow() ` stations
 
@@ -115,7 +115,7 @@ How many distinct stations serve the A train? `r a_train` stations.
 
 Of the stations that serve the A train, how many are ADA compliant? `r ada_atrain` stations. 
 
-#Question 2 
+# Question 2 
 
 Importing data from Mr. Trash Wheel, Professor Trash Wheel, Gwynnda Trash Wheel.
 ```{r import data}
@@ -182,7 +182,6 @@ trashwheels_df =
   janitor::clean_names() 
 ```
 
-Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in the resulting dataset, and give examples of key variables. For available data, what was the total weight of trash collected by Professor Trash Wheel? What was the total number of cigarette butts collected by Gwynnda in June of 2022?
 
 The trashwheel dataset contains data from three trash wheels Mr. Trash Wheel, Professor Trash Wheel and Gwynnda Trash Wheel. There is a total of `r nrow(trashwheels_df)` observations, `r nrow(filter(trashwheels_df,trash_wheel == "Mr. Trash Wheel" ))` observations from Mr. Trash Wheel,`r nrow(filter(trashwheels_df,trash_wheel == "Professor Trash Wheel" ))` observations from Professor Trash Wheel, and `r nrow(filter(trashwheels_df,trash_wheel == "Gwynnda Trash Wheel" ))` observations from Gwynnda Trash Wheel. This dataset includes information on types of trash collected including, `r names(trashwheels_df |> select(plastic_bottles:sports_balls))`, while only sports ball data is only available for Mr. Trash Wheel. Other details on trash collection include `r names(trashwheels_df |> select(date, homes_powered))`, weight in tons and volume in cubic yards.
 
@@ -190,7 +189,7 @@ The total weight of trash collected by Professor Trash Wheel is `r filter(trashw
 
 The total number of cigarette butts collected by Gwynnda in June of 2022 is `r filter(trashwheels_df,trash_wheel == "Gwynnda Trash Wheel", month == "June", year == 2022) |> select(cigarette_butts) |> sum() |> format( scientific=FALSE)`.
 
-#Question 3 
+# Question 3 
 
 
 ```{r}
