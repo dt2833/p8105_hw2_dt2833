@@ -188,7 +188,7 @@ The trashwheel dataset contains data from three trash wheels Mr. Trash Wheel, Pr
 
 The total weight of trash collected by Professor Trash Wheel is `r filter(trashwheels_df,trash_wheel == "Professor Trash Wheel") |> select(weight_tons) |>sum() ` tons. 
 
-The total number of cigarette butts collected by Gwynnda in June of 2022 is `r filter(trashwheels_df,trash_wheel == "Gwynnda Trash Wheel", month == "June", year == 2022) |> select(cigarette_butts) |> sum() |> format( scientific=FALSE)`
+The total number of cigarette butts collected by Gwynnda in June of 2022 is `r filter(trashwheels_df,trash_wheel == "Gwynnda Trash Wheel", month == "June", year == 2022) |> select(cigarette_butts) |> sum() |> format( scientific=FALSE)`.
 
 #Question 3 
 
