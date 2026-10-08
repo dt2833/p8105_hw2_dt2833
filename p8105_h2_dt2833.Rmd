@@ -7,18 +7,6 @@ output: github_document
 
 ---
 
-instructions: 
-Read and clean the data; retain line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance. Convert the entry variable from character (YES vs NO) to a logical variable (case_match function may be useful).
-
-Write a short paragraph about this dataset – explain briefly what variables the dataset contains, describe your data cleaning steps so far, and give the dimension (rows x columns) of the resulting dataset. Are these data tidy?
-
-Answer the following questions using these data:
-
-How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox); the distinct function may be useful here.
-How many stations are ADA compliant?
-What proportion of station entrances / exits without vending allow entrance?
-Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? Of the stations that serve the A train, how many are ADA compliant?
-
 
 # Question 1
 
@@ -41,62 +29,36 @@ select (line, station_name, station_latitude, station_longitude, route1,route2, 
 ```
 
 
-__Description__
-
-Dataset contains variables: `r names(transit_df)`. For data cleaning, we have cleaned names, selected our desired variables, and standardized missing values to NA. This dataset contains `r ncol(transit_df)` columns and `r nrow(transit_df)` rows. 
-
-How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox)? `r n_distinct(pull(transit_df, station_name+line))` unique stations 
-
-This dataset could be more "tidier", the 11 route variable columns are difficult to read 
-
-How many stations are ADA compliant? 84 
-What proportion of station entrances / exits without vending allow entrance?
-45/117 = 0.3846154
-
-Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? 60
-Of the stations that serve the A train, how many are ADA compliant? 17
-
-#do i delete NA route name?
-
 ```{r ada}
 transit_distinct_df = 
-  distinct(transit_df, station_name, line, .keep_all = TRUE)  |> nrow()
+  distinct(transit_df, station_name, line, .keep_all = TRUE) 
 
 transit_distinct_df|> 
 filter(ada ==TRUE) |> 
   nrow()
-
-
-n_distinct(pull(transit_df, station_name+line)) # + 
-# 472, not 465 
-n_distinct(pull(transit_df, interaction(line, station_name)))
-
-transit_df %>%
-
-mutate(station_and_line = interaction(station_name, line)) %>% #interaction: 
-
-pull(station_and_line) %>%
-
-n_distinct()
-
 ```
-```{r}
 
-
-```
 
 ```{r vending and entry}
+vending_no = filter(transit_df,vending == "NO")
+
 filter(transit_df,vending == "NO")|> 
   nrow() #117
 
-filter(transit_df,vending == "NO", entry == "FALSE") |>
-  nrow() #72
+vending_no_nrow = vending_no |>nrow()
 
+filter(transit_df,vending == "NO", entry == "TRUE") |>
+  nrow() #45
+
+vending_no_entry_yes = filter(vending_no, entry == "TRUE") |>
+  nrow() #45
 ```
+
 
 ```{r reformat routes}
 #how many a train stations
-transit_df |>
+a_train = 
+  transit_df |>
   mutate (
     route8 = as.character(route8),
     route9 = as.character(route9),
@@ -114,6 +76,7 @@ filter(route_name=="A" )|>
   nrow() #60
 
 #how many are ada compliant
+ada_atrain = 
 transit_df |>
   mutate (
     route8 = as.character(route8),
@@ -134,21 +97,39 @@ nrow()
 
 ```
 
+__Description__
+
+Dataset contains variables: `r names(transit_df)`. Each route variable represents an additional line that station serves (the most train routes served at one station is 11). For data cleaning, we have cleaned names, selected our desired variables, and standardized missing values to NA. This dataset contains `r ncol(transit_df)` columns and `r nrow(transit_df)` rows. 
+
+How many distinct stations are there?  `r distinct(transit_df, station_name, line, .keep_all = TRUE)  |> nrow()` unique stations 
+
+This dataset could be more "tidier", the 11 route variable columns are difficult to read . 
+
+
+How many stations are ADA compliant? `r transit_distinct_df|> filter(ada ==TRUE) |> nrow() ` stations
+
+What proportion of station entrances / exits without vending allow entrance?
+`r filter(transit_df,vending == "NO", entry == "TRUE") |>nrow()`  / `r filter(transit_df,vending == "NO")|> nrow()` = `r ((filter(transit_df,vending == "NO", entry == "TRUE") |>nrow() / filter(transit_df,vending == "NO")|> nrow())*100) |> round(digits = 2)` % station entrances. 
+
+How many distinct stations serve the A train? `r a_train` stations. 
+
+Of the stations that serve the A train, how many are ADA compliant? `r ada_atrain` stations. 
+
 #Question 2 
 
-Importing data from Mr. Trash Wheel, Professor Trash Wheel, Gwynns Falls Trash Wheel.
+Importing data from Mr. Trash Wheel, Professor Trash Wheel, Gwynnda Trash Wheel.
 ```{r import data}
 library(readxl)
 
-mrtrash_df = read_excel("./data/202509 Trash Wheel Collection Data.xlsx", sheet="Mr. Trash Wheel",  
+mrtrash_df = read_excel("./data/202610 Trash Wheel Collection Data.xlsx", sheet="Mr. Trash Wheel",  
              na = c("NA", ".", ""))|>
              janitor::clean_names() 
   
-proftrash_df = read_excel("./data/202509 Trash Wheel Collection Data.xlsx", sheet="Professor Trash Wheel",
-              na = c("NA", ".", ""))|>
+proftrash_df = read_excel("./data/202610 Trash Wheel Collection Data.xlsx", sheet="Professor Trash Wheel",
+              na = c("NA", ".", "", "dive"))|>
              janitor::clean_names() 
 
-gwynnstrash_df = read_excel("./data/202509 Trash Wheel Collection Data.xlsx", sheet="Gwynns Falls Trash Wheel",
+gwynndatrash_df = read_excel("./data/202610 Trash Wheel Collection Data.xlsx", sheet="Gwynnda the Good Wheel of the W",
               na = c("NA", ".", ""))|>
              janitor::clean_names()  
 ```
@@ -174,11 +155,11 @@ proftrash_df =
   relocate(trash_wheel) 
 ```
 
-Cleaning Gwynns Falls Trash Wheel
-```{r Gwynns Falls Trash Wheel}
-gwynnstrash_df = 
-  filter (gwynnstrash_df, !is.na(dumpster)) |> #deleted non-dumpster specific data rows
-    mutate(trash_wheel = "Gwynns Falls Trash Wheel") |> # creating new variable to indicate wheel source of data 
+Cleaning Gwynnda Trash Wheel
+```{r Gwynnda Trash Wheel}
+gwynndatrash_df = 
+  filter (gwynndatrash_df, !is.na(dumpster)) |> #deleted non-dumpster specific data rows
+  mutate(trash_wheel = "Gwynnda Trash Wheel") |> # creating new variable to indicate wheel source of data 
   relocate(trash_wheel) 
 
 ```
@@ -186,9 +167,9 @@ gwynnstrash_df =
 Combining into 1 dataframe
 ```{r}
 
-str(mrtrash_df) # year variable needs to be converted to numeric to match other dataframes
+str(mrtrash_df) # year variable needs to be converted from chr to numeric to match other dataframes
 str(proftrash_df)
-str(gwynnstrash_df)
+str(gwynndatrash_df)
 
 #converting 
 mrtrash_df = 
@@ -197,17 +178,17 @@ mrtrash_df =
 #binding rows
 
 trashwheels_df = 
-  bind_rows(mrtrash_df, proftrash_df, gwynnstrash_df) |>
+  bind_rows(mrtrash_df, proftrash_df, gwynndatrash_df) |>
   janitor::clean_names() 
 ```
 
 Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in the resulting dataset, and give examples of key variables. For available data, what was the total weight of trash collected by Professor Trash Wheel? What was the total number of cigarette butts collected by Gwynnda in June of 2022?
 
-The trashwheel dataset contains data from three trash wheels: Mr. Trash Wheel, Professor Trash Wheel and Gwynns Falls Trash Wheel. There is a total of `r nrow(trashwheels_df)` observations, `r nrow(filter(trashwheels_df,trash_wheel == "Mr. Trash Wheel" ))` observations from Mr. Trash Wheel,`r nrow(filter(trashwheels_df,trash_wheel == "Professor Trash Wheel" ))` observations from Professor Trash Wheel, and `r nrow(filter(trashwheels_df,trash_wheel == "Gwynns Falls Trash Wheel" ))` observations from Gwynns Falls Trash Wheel. This dataset includes information on types of trash collected including, `r names(trashwheels_df |> select(plastic_bottles:sports_balls))`, while only sports ball data is only available for Mr. Trash Wheel. Other details on collection include `r names(trashwheels_df |> select(date, homes_powered))`, weight in tones and volume in cubic yards.
+The trashwheel dataset contains data from three trash wheels Mr. Trash Wheel, Professor Trash Wheel and Gwynnda Trash Wheel. There is a total of `r nrow(trashwheels_df)` observations, `r nrow(filter(trashwheels_df,trash_wheel == "Mr. Trash Wheel" ))` observations from Mr. Trash Wheel,`r nrow(filter(trashwheels_df,trash_wheel == "Professor Trash Wheel" ))` observations from Professor Trash Wheel, and `r nrow(filter(trashwheels_df,trash_wheel == "Gwynnda Trash Wheel" ))` observations from Gwynnda Trash Wheel. This dataset includes information on types of trash collected including, `r names(trashwheels_df |> select(plastic_bottles:sports_balls))`, while only sports ball data is only available for Mr. Trash Wheel. Other details on trash collection include `r names(trashwheels_df |> select(date, homes_powered))`, weight in tons and volume in cubic yards.
 
 The total weight of trash collected by Professor Trash Wheel is `r filter(trashwheels_df,trash_wheel == "Professor Trash Wheel") |> select(weight_tons) |>sum() ` tons. 
 
-The total number of cigarette butts collected by Gwynnda in June of 2022 is `r filter(trashwheels_df,trash_wheel == "Gwynns Falls Trash Wheel", month == "June", year == 2022) |> select(cigarette_butts) |> sum() |> format( scientific=FALSE)`
+The total number of cigarette butts collected by Gwynnda in June of 2022 is `r filter(trashwheels_df,trash_wheel == "Gwynnda Trash Wheel", month == "June", year == 2022) |> select(cigarette_butts) |> sum() |> format( scientific=FALSE)`
 
 #Question 3 
 
